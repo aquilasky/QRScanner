@@ -191,9 +191,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         preferences.refreshLogin()
         if settingsWindow == nil {
             let view = SettingsView(preferences: preferences,
-                scan: { [weak self] in self?.scan() },
                 requestNotifications: { [weak self] in self?.requestNotifications() })
-            settingsWindow = makeWindow(title: "QRScanner 设置", size: NSSize(width: 490, height: 460), view: view)
+            settingsWindow = makeWindow(title: "QRScanner 设置", size: NSSize(width: 360, height: 220), view: view)
         }
         settingsWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
@@ -255,23 +254,13 @@ func openScreenPermissionSettings() {
 
 struct SettingsView: View {
     @ObservedObject var preferences: Preferences
-    let scan: () -> Void
     let requestNotifications: () -> Void
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            HStack(spacing: 14) {
-                Image(systemName: "qrcode.viewfinder").font(.system(size: 38)).foregroundStyle(.green)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("QRScanner").font(.title.bold())
-                    Text("屏幕上的二维码，随手一扫").foregroundStyle(.secondary)
-                }
-            }
-            Text("左键菜单栏图标进入扫描。单击选择鼠标指向的窗口，拖动框选区域；Esc 或右键取消。")
-                .fixedSize(horizontal: false, vertical: true)
-            Divider()
+        VStack(alignment: .leading, spacing: 16) {
             Toggle("开机启动", isOn: Binding(get: { preferences.loginEnabled }, set: preferences.setLogin))
             if !preferences.loginMessage.isEmpty {
                 Text(preferences.loginMessage).font(.caption).foregroundStyle(.orange)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Toggle("识别到单个网页链接后自动打开", isOn: $preferences.autoOpen)
             Toggle("扫描完成后发送系统通知", isOn: $preferences.notifications)
@@ -280,16 +269,10 @@ struct SettingsView: View {
                 Button("屏幕录制权限…") { openScreenPermissionSettings() }
                 Button("通知权限…", action: requestNotifications)
             }
-            Text("使用 Apple Vision 在本机识别，不保存截图或扫描历史。仅 HTTP / HTTPS 链接可在默认浏览器中打开。")
-                .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-            HStack {
-                Text("macOS 原生 · v0.1.0").font(.caption).foregroundStyle(.secondary)
-                Spacer()
-                Button("开始扫描", action: scan).buttonStyle(.borderedProminent).tint(.green)
-            }
+            Text("v0.1.0").font(.caption).foregroundStyle(.secondary)
         }
-        .padding(26)
-        .frame(width: 490)
+        .padding(20)
+        .frame(width: 360)
     }
 }
 

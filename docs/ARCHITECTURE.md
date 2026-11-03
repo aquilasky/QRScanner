@@ -4,7 +4,7 @@ macOS 14+，Swift / AppKit / SwiftUI，无第三方依赖。参考 QR Flick（MI
 
 `NSStatusItem → 捕获会话 → 内存截图 → 覆盖层选择 → Vision → URL/文本处理 → 本地通知`
 
-- 菜单栏左键扫描、右键 NSMenu。LSUIElement 隐藏 Dock。
+- 菜单栏左键扫描、右键 NSMenu。LSUIElement 隐藏 Dock。设置仅保留三个开关、两个权限入口及版本号；捕获覆盖层只显示遮罩与选区边框，不显示窗口标题或操作文字。
 - ScreenCaptureKit 获取屏幕和窗口列表；扫描前捕获每块显示器一次，排除自身应用。覆盖层显示冻结帧，确保用户所选内容与识别内容一致。
 - 每个 NSScreen 对应一个无边框 NSWindow。AppKit 全局坐标（原点左下）和 ScreenCaptureKit 窗口坐标（主屏左上）通过主屏上边界转换；截图裁剪按每屏实际像素比例映射。
 - 窗口按屏幕上前后顺序命中，排除桌面、菜单栏和本应用；无候选时选择该显示器。拖动距离超过 5pt 切换矩形；框选限定在起始屏幕，窗口跨屏则拼接各屏交集。

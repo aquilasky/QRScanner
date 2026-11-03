@@ -142,7 +142,6 @@ private final class CaptureOverlayView: NSView {
     private var anchor: CGPoint?
     private var dragged = false
     private var selection: CGRect = .zero
-    private var label = ""
 
     init(snapshot: DisplaySnapshot, candidates: [WindowCandidate]) {
         self.snapshot = snapshot
@@ -169,7 +168,6 @@ private final class CaptureOverlayView: NSView {
     private func updateHover(_ point: CGPoint) {
         let candidate = ScanGeometry.window(at: point, candidates: candidates)
         selection = candidate?.frame ?? snapshot.frame
-        label = candidate?.title ?? "整个显示器"
         needsDisplay = true
     }
     override func mouseMoved(with event: NSEvent) { if anchor == nil { updateHover(globalPoint(event)) } }
@@ -184,7 +182,6 @@ private final class CaptureOverlayView: NSView {
         if ScanGeometry.isDrag(from: anchor, to: end) { dragged = true }
         if dragged {
             selection = ScanGeometry.region(from: anchor, to: end, within: snapshot.frame)
-            label = "\(Int(selection.width)) × \(Int(selection.height))"
             needsDisplay = true
         }
     }
@@ -213,15 +210,5 @@ private final class CaptureOverlayView: NSView {
             outline.lineWidth = 2
             outline.stroke()
         }
-        let hint = "\(label)\n单击识别窗口 · 拖动框选 · Esc / 右键取消"
-        let paragraph = NSMutableParagraphStyle()
-        paragraph.alignment = .center
-        let attrs: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 14, weight: .medium),
-            .foregroundColor: NSColor.white, .paragraphStyle: paragraph]
-        let width = min(bounds.width - 32, 620)
-        let box = CGRect(x: (bounds.width - width) / 2, y: 36, width: width, height: 58)
-        NSColor.black.withAlphaComponent(0.8).setFill()
-        NSBezierPath(roundedRect: box.insetBy(dx: -10, dy: -8), xRadius: 12, yRadius: 12).fill()
-        (hint as NSString).draw(in: box, withAttributes: attrs)
     }
 }

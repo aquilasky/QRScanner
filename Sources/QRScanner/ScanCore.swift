@@ -40,7 +40,24 @@ enum ScanGeometry {
     }
 }
 
+enum LinkAction: Equatable {
+    case unsupported
+    case open(URL)
+    case intercepted(URL)
+}
+
 enum PayloadPolicy {
+    // Both automatic and manual opening use this decision, before handing off to a browser.
+    static func linkAction(_ payload: String, intercept: (URL) -> Bool = { _ in false }) -> LinkAction {
+        guard let url = webURL(payload) else { return .unsupported }
+        return intercept(url) ? .intercepted(url) : .open(url)
+    }
+
+    static func clipboardText(_ payloads: [String], enabled: Bool) -> String? {
+        guard enabled, !payloads.isEmpty else { return nil }
+        return payloads.joined(separator: "\n")
+    }
+
     static func webURL(_ payload: String) -> URL? {
         guard let parts = URLComponents(string: payload.trimmingCharacters(in: .whitespacesAndNewlines)),
               let scheme = parts.scheme?.lowercased(), ["https", "http"].contains(scheme),

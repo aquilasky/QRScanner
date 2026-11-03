@@ -8,14 +8,16 @@ import CoreImage.CIFilterBuiltins
 @MainActor
 final class Preferences: ObservableObject {
     @Published var autoOpen: Bool { didSet { UserDefaults.standard.set(autoOpen, forKey: "autoOpen") } }
+    @Published var autoCopy: Bool { didSet { UserDefaults.standard.set(autoCopy, forKey: "autoCopy") } }
     @Published var notifications: Bool { didSet { UserDefaults.standard.set(notifications, forKey: "notifications") } }
     @Published var loginEnabled = false
     @Published var loginMessage = ""
 
     init() {
         let defaults = UserDefaults.standard
-        defaults.register(defaults: ["autoOpen": true, "notifications": true])
+        defaults.register(defaults: ["autoOpen": true, "autoCopy": false, "notifications": true])
         autoOpen = defaults.bool(forKey: "autoOpen")
+        autoCopy = defaults.bool(forKey: "autoCopy")
         notifications = defaults.bool(forKey: "notifications")
         refreshLogin()
     }
@@ -43,6 +45,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     private var capture: CaptureSession?
     private var busy = false
     private let preferences = Preferences()
+    // Future URL-specific rules (for example WeChat) belong here. No rule is enabled yet.
+    private let interceptLink: (URL) -> Bool = { _ in false }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -83,6 +87,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             login.state = preferences.loginEnabled ? .on : .off
             let auto = menu.addItem(withTitle: "自动打开网页链接", action: #selector(toggleAutoOpen), keyEquivalent: "")
             auto.state = preferences.autoOpen ? .on : .off
+            let copy = menu.addItem(withTitle: "识别后自动复制内容", action: #selector(toggleAutoCopy), keyEquivalent: "")
+            copy.state = preferences.autoCopy ? .on : .off
             let notifications = menu.addItem(withTitle: "扫描完成通知", action: #selector(toggleNotifications), keyEquivalent: "")
             notifications.state = preferences.notifications ? .on : .off
             menu.addItem(withTitle: "设置…", action: #selector(showSettings), keyEquivalent: ",")
@@ -100,6 +106,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         if !preferences.loginMessage.isEmpty { showSettings() }
     }
     @objc private func toggleAutoOpen() { preferences.autoOpen.toggle() }
+    @objc private func toggleAutoCopy() { preferences.autoCopy.toggle() }
     @objc private func toggleNotifications() {
         preferences.notifications.toggle()
         if preferences.notifications { requestNotifications() }
@@ -166,22 +173,51 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             notify(title: "未发现二维码", body: "请重新选择窗口或区域。")
             return
         }
-        if results.count == 1, preferences.autoOpen, let url = PayloadPolicy.webURL(results[0]) {
+        var copyFeedback = ""
+        var copyFailed = false
+        if let text = PayloadPolicy.clipboardText(results, enabled: preferences.autoCopy) {
+            NSPasteboard.general.clearContents()
+            copyFailed = !NSPasteboard.general.setString(text, forType: .string)
+            copyFeedback = copyFailed ? "自动复制失败，可在结果中手动复制。" : "内容已复制。"
+        }
+        if results.count == 1, preferences.autoOpen,
+           case .open(let url) = PayloadPolicy.linkAction(results[0], intercept: interceptLink) {
             if NSWorkspace.shared.open(url) {
-                notify(title: "已识别并打开网页", body: "已交给默认浏览器打开。")
+                if copyFailed { showResults(results, message: "网页已打开，复制未完成", detail: "你可以手动复制内容。") }
+                notify(title: "已识别并打开网页", body: "已交给默认浏览器打开。" + copyFeedback)
             } else {
-                showResults(results, message: "浏览器未能打开链接", detail: "你可以复制链接后手动打开。")
-                notify(title: "已识别二维码", body: "浏览器未能打开，请查看结果。")
+                showResults(results, message: "浏览器未能打开链接", detail: "你可以复制链接后手动打开。" + copyFeedback)
+                notify(title: "已识别二维码", body: "浏览器未能打开，请查看结果。" + copyFeedback)
             }
         } else {
-            showResults(results, message: results.count == 1 ? "已识别二维码" : "发现 \(results.count) 个二维码",
-                        detail: "选择要打开或复制的内容。")
-            notify(title: "二维码识别完成", body: results.count == 1 ? "结果已显示，可以打开或复制。" : "发现多个结果，请选择。")
+            let intercepted = results.count == 1 && isIntercepted(results[0])
+            showResults(results, message: intercepted ? "已暂停打开链接" : (results.count == 1 ? "已识别二维码" : "发现 \(results.count) 个二维码"),
+                        detail: (intercepted ? "链接已被打开规则拦截，可复制内容。" : "选择要打开或复制的内容。") + copyFeedback)
+            notify(title: "二维码识别完成", body: (intercepted ? "链接已暂停打开。" : (results.count == 1 ? "结果已显示，可以打开或复制。" : "发现多个结果，请选择。")) + copyFeedback)
+        }
+    }
+
+    private func isIntercepted(_ payload: String) -> Bool {
+        if case .intercepted = PayloadPolicy.linkAction(payload, intercept: interceptLink) { return true }
+        return false
+    }
+
+    private func openPayload(_ payload: String) {
+        switch PayloadPolicy.linkAction(payload, intercept: interceptLink) {
+        case .open(let url):
+            if !NSWorkspace.shared.open(url) {
+                notify(title: "未能打开链接", body: "请复制链接后手动打开。")
+            }
+        case .intercepted:
+            notify(title: "已暂停打开链接", body: "链接已被打开规则拦截，可复制内容。")
+        case .unsupported:
+            break
         }
     }
     private func showResults(_ results: [String], message: String, detail: String) {
         resultWindow?.close()
         let view = ResultsView(results: results, message: message, detail: detail,
+                              openPayload: { [weak self] in self?.openPayload($0) },
                               scanAgain: { [weak self] in self?.scan() })
         let window = makeWindow(title: "QRScanner · 识别结果", size: NSSize(width: 520, height: 360), view: view)
         resultWindow = window
@@ -268,6 +304,7 @@ struct SettingsView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             Toggle("识别到单个网页链接后自动打开", isOn: $preferences.autoOpen)
+            Toggle("识别后自动复制内容", isOn: $preferences.autoCopy)
             Toggle("扫描完成后发送系统通知", isOn: $preferences.notifications)
                 .onChange(of: preferences.notifications) { _, enabled in if enabled { requestNotifications() } }
             HStack {
@@ -285,6 +322,7 @@ struct ResultsView: View {
     let results: [String]
     let message: String
     let detail: String
+    let openPayload: (String) -> Void
     let scanAgain: () -> Void
     @State private var copied: String?
     var body: some View {
@@ -299,8 +337,8 @@ struct ResultsView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(payload).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
                                 HStack {
-                                    if let url = PayloadPolicy.webURL(payload) {
-                                        Button("在浏览器打开") { NSWorkspace.shared.open(url) }
+                                    if PayloadPolicy.webURL(payload) != nil {
+                                        Button("在浏览器打开") { openPayload(payload) }
                                     }
                                     Button(copied == payload ? "已复制" : "复制内容") {
                                         NSPasteboard.general.clearContents()

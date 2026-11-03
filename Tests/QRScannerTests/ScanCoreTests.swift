@@ -39,6 +39,22 @@ final class ScanCoreTests: XCTestCase {
             XCTAssertNil(PayloadPolicy.webURL(payload), payload)
         }
     }
+    func testClipboardChoicePreservesPayloadAndEmptyScan() {
+        XCTAssertNil(PayloadPolicy.clipboardText(["text"], enabled: false))
+        XCTAssertNil(PayloadPolicy.clipboardText([], enabled: true))
+        XCTAssertEqual(PayloadPolicy.clipboardText([" 纯文本\n第二行 "], enabled: true), " 纯文本\n第二行 ")
+        XCTAssertEqual(PayloadPolicy.clipboardText(["https://example.com", "文本"], enabled: true), "https://example.com\n文本")
+    }
+    func testLinkInterceptionBeforeOpening() {
+        let payload = "https://example.com/next"
+        let url = URL(string: payload)!
+        XCTAssertEqual(PayloadPolicy.linkAction(payload), .open(url))
+        XCTAssertEqual(PayloadPolicy.linkAction(payload, intercept: { _ in true }), .intercepted(url))
+        var consulted = false
+        XCTAssertEqual(PayloadPolicy.linkAction("纯文本", intercept: { _ in consulted = true; return true }), .unsupported)
+        XCTAssertFalse(consulted)
+        XCTAssertEqual(PayloadPolicy.linkAction("weixin://test"), .unsupported)
+    }
     func testKnownQRCodeRoundTripAndBlank() throws {
         let payload = "https://example.com/qr-test?value=42"
         let filter = CIFilter.qrCodeGenerator()

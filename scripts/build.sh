@@ -16,6 +16,7 @@ STAGED_APP="$STAGE_DIR/QRScanner.app"
 mkdir -p "$STAGED_APP/Contents/MacOS" "$STAGED_APP/Contents/Resources"
 cp "$BIN_DIR/QRScanner" "$STAGED_APP/Contents/MacOS/QRScanner"
 cp scripts/Info.plist "$STAGED_APP/Contents/Info.plist"
+cp Resources/AppIcon.icns "$STAGED_APP/Contents/Resources/AppIcon.icns"
 codesign --force --sign "$SIGN_IDENTITY" "$STAGED_APP"
 codesign --verify --strict "$STAGED_APP"
 # Same executable + metadata + code requirement means there is nothing to deploy.
@@ -23,6 +24,7 @@ codesign --verify --strict "$STAGED_APP"
 if [[ -d "$APP_DIR" ]] && \
    cmp -s "$STAGED_APP/Contents/MacOS/QRScanner" "$APP_DIR/Contents/MacOS/QRScanner" && \
    cmp -s "$STAGED_APP/Contents/Info.plist" "$APP_DIR/Contents/Info.plist" && \
+   cmp -s "$STAGED_APP/Contents/Resources/AppIcon.icns" "$APP_DIR/Contents/Resources/AppIcon.icns" && \
    codesign --verify --strict "$APP_DIR" 2>/dev/null; then
     print -r -- "构建内容未变，保留现有应用：$APP_DIR"
     exit 0

@@ -3,6 +3,7 @@
 <plist version="1.0"><dict>
 <key>CFBundleExecutable</key><string>QRScanner</string>
 <key>CFBundleIdentifier</key><string>com.aquila.QRScanner</string>
+<key>CFBundleIconFile</key><string>AppIcon</string>
 <key>CFBundleName</key><string>QRScanner</string>
 <key>CFBundleDisplayName</key><string>QRScanner</string>
 <key>CFBundlePackageType</key><string>APPL</string>

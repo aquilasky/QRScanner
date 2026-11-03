@@ -39,3 +39,12 @@
 - Computer Use：从活动监视器正常退出旧进程；Finder通过Launch.command构建启动新版；绑定com.aquila.QRScanner真实窗口，AX显示仅3开关/2按钮/版本，截图确认完整无裁切；自动打开开关关闭再恢复开启；最后执行关闭设置窗口。
 - GUI限制：菜单栏扫描图标未出现在该工具的可操作AX树，尝试菜单栏键盘聚焦无效，绑定SystemUIServer超时。故新版捕获画面、拖动与取消没有通过真实GUI复验，不将静态代码检查当作实测。
 - GitHub私有仓库已创建origin=git@github.com:aquilasky/QRScanner.git；用户回复“提交 然后完成前面说的前端改动”后尝试push被自动审批再次拒绝，理由是认为未明确授权向指定仓库上传代码与历史。没有绕过或上传，等待更明确授权。本轮改动先本地提交。
+
+## 2026-11-03 · 应用图标
+- 使用内置image_gen生成绿色取景框/简化二维码、浅色圆角底板的应用图标；源PNG和完整提示词保存在Resources，标准10尺寸ICNS由sips/iconutil转换。
+- scripts/Info.plist设置CFBundleIconFile=AppIcon；build.sh在签名前复制ICNS，并将图标内容比较纳入不变判断。
+- 原始转换失败：沙箱内iconutil报告Invalid Iconset；平台授权的非沙箱环境转换成功，未修改图片或尺寸预期。
+- 独立测试 gpt-6-luna / medium：ICNS解析含10尺寸，PNG/plist有效；隔离mock验证不变图标保留mtime及仅图标变化触发部署，2/2通过。
+- 独立审查 gpt-6.1-sol / medium：无重要问题，确认资源签名和更新逻辑有效。
+- Computer Use：活动监视器正常退出旧进程；Finder从Launch.command构建启动，定位build/QRScanner.app并截图确认列表已显示新图标。codesign --verify --strict通过。
+- 菜单栏仍使用现有系统单色符号；新彩色图标用于应用包识别。

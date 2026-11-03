@@ -75,3 +75,5 @@
 - 独立审查gpt-6.1-sol / medium：打包、签名、错误处理、架构检查和发布说明无重要问题。对最终lipo -archs替代也已复核。
 - Computer Use：Finder查看只读挂载盘，切换图标视图确认应用新图标、Applications及安装说明。已卸载；未从临时挂载路径启动app，以免建立重复应用路径授权。
 - Release作为预览版，明确未经Developer ID签名/Apple公证、Intel未实机验证、部分扫码/通知GUI验证未完成。当前无代码许可变更。
+- 发布完成：PR #1已合并，发布源提交9eda528e9a929f676f843e68bc518154cb24cdb9；GitHub仓库可见性已核对PUBLIC。
+- v0.1.2预览Release已公开（非草稿）：https://github.com/aquilasky/QRScanner/releases/tag/v0.1.2 。DMG及.sha256状态uploaded，GitHub记录DMG的SHA256与本地一致：3608b5a9239e34cc4d88c03d21068e0f1f269c808a56934c5c65c2f3073a71a0。

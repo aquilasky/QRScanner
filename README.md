@@ -33,6 +33,12 @@ macOS 14+ 原生菜单栏二维码扫描器。Swift + AppKit + SwiftUI，ScreenC
 
 用 Xcode 打开 `Package.swift` 可浏览和调试 Swift Package；直接启动未包装的可执行文件不适合验证系统通知或权限，实测请使用 `.app`。脚本设置项目内模块缓存以兼容受限环境。
 
+构建先在临时目录完成签名；二进制和配置未变时保留现有应用，避免无意义地更新权限身份。代码变化且 QRScanner 正在运行时，构建会停止部署，请先在菜单栏右键退出再重试。不要在运行中手动覆盖 `.app`。
+
+默认使用 ad-hoc 签名，代码更新后 macOS 可能要求重新授权。需要跨版本稳定授权时，安装 Apple Development / Developer ID 签名证书，并设置 `QRSCANNER_SIGN_IDENTITY` 为证书名称或指纹后构建；脚本不会自动创建证书或修改钥匙串。
+
+若系统设置已有条目但仍反复提示：先完全退出 QRScanner；确认以后仅从本项目 `build/QRScanner.app` 启动。重新打开后再试；若仍失败，在系统设置中移除旧 QRScanner 条目，用当前应用发起扫描并重新授权，按系统提示退出重开。权限操作由用户手动完成；不需要重置其他应用的权限。
+
 规范见 `AGENTS.md`；架构见 `docs/ARCHITECTURE.md`；真实验证状态与限制见 `DEVELOPMENT_LOG.md`。
 
 ## 参考

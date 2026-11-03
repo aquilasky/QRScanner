@@ -13,4 +13,4 @@ macOS 14+，Swift / AppKit / SwiftUI，无第三方依赖。参考 QR Flick（MI
 - ServiceManagement 读取系统登录项实际状态；UserDefaults 仅保存偏好，不保存截图或扫描历史。
 - 屏幕录制与通知权限通过系统 API 请求；权限拒绝时提供明确可操作反馈。登录启动只有用户启用时注册。
 
-构建：Swift Package 编译可执行文件，由 scripts/build.sh 包装为 .app，Launch.command 构建后打开。当前本机开发使用 ad-hoc 签名；外部分发需 Developer ID 与公证。
+构建：Swift Package 编译可执行文件，由 scripts/build.sh 包装为 .app，Launch.command 构建后打开。构建在临时目录准备并签名，同一内容保留现有 bundle；运行中的应用不得被新构建覆盖。默认本机开发使用 ad-hoc 签名，支持 QRSCANNER_SIGN_IDENTITY 指定稳定证书；ad-hoc 的代码身份绑定具体代码，更新后可能重新请求 TCC 授权。外部分发需 Developer ID 与公证。

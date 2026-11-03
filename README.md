@@ -2,9 +2,17 @@
 
 macOS 14+ 原生菜单栏二维码扫描器。Swift + AppKit + SwiftUI，ScreenCaptureKit 捕获画面、Apple Vision 本地识别，无第三方依赖。
 
-## 启动
+## 下载安装
 
-双击根目录 **Launch.command**。脚本使用已安装的 Xcode / Swift 编译，并打开 `build/QRScanner.app`。以后也可直接打开该应用。当前构建针对本机架构，尚未制作通用分发包或 Apple 公证版本。
+从 [GitHub Releases](https://github.com/aquilasky/QRScanner/releases) 下载 `QRScanner-0.1.2-universal.dmg`，将应用拖入 Applications，再从“应用程序”启动。支持 macOS 14+，包含 Apple Silicon 和 Intel 两种架构。
+
+当前为预览版本，使用 ad-hoc 本地签名，未经 Developer ID 签名及 Apple 公证。若系统阻止打开，核对 Release 来源和 SHA-256 后，在系统“隐私与安全性”中按“仍要打开”流程确认；无需关闭系统保护。Intel 尚未实机验证，多屏和通知图标表现仍需更多实测。
+
+升级时先退出旧版再替换，按系统提示重新授予屏幕录制权限。
+
+## 从源码启动
+
+双击根目录 **Launch.command**。脚本使用已安装的 Xcode / Swift 编译，并打开 `build/QRScanner.app`。以后也可直接打开该应用。开发入口构建本机架构；发布入口 `./scripts/package-dmg.sh` 构建通用 DMG。当前尚无 Apple 公证版本。
 
 首次左键扫描时，在系统设置 → 隐私与安全性 → 屏幕与系统音频录制中允许 QRScanner。若系统要求重启，退出应用后重新打开。
 

@@ -65,3 +65,13 @@
 - 独立审查gpt-6.1-sol / medium无重要问题，建议实际确认增加开关后的窗口高度。版本0.1.2/build3。
 - Computer Use：活动监视器正常退出旧进程；Finder从Launch.command启动0.1.2，真实窗口截图确认四开关/两个权限按钮/版本全部显示；自动复制0→1，defaults只读确认持久值为1，然后1→0恢复默认并关闭设置窗口。codesign严格验证通过。
 - GUI范围限制：本轮未通过实际屏幕扫码验证纯文本到剪贴板端到端链路，菜单栏扫描入口仍无法由当前Computer Use绑定；复制内容/拦截策略使用自动测试验证，未声称微信规则已实现。
+
+## 2026-11-03 · v0.1.2 DMG公开发布准备
+- 用户明确要求制作DMG、上传GitHub Release、仓库转公开。发布前检查8个历史提交/42个对象的常见凭据模式无命中；未跟踪缓存、构建或屏幕图片。既有开发日志/提交作者信息随仓库公开，不重写历史。
+- 新增scripts/package-dmg.sh：独立scratch双架构构建，暂存payload内App/Applications链接/安装说明，ad-hoc签名，UDZO镜像验证后移入dist并生成SHA256。不会替换开发用build/QRScanner.app。dist忽略。
+- 原始失败：两次lipo -verify_arch均报requires exactly one input file（即使标准参数顺序直接对fat文件调用）；以lipo -archs并严格接受arm64+x86_64两架构替代，vtool独立检查两slice minos14.0，保留日志.build/package-release*.log。
+- 产物dist/QRScanner-0.1.2-universal.dmg，约1.9MB；配套.sha256。
+- 独立测试gpt-6-luna / medium：源DMG及临时副本hdiutil verify、dist目录SHA256、只读挂载三项payload、Applications目标、codesign deep strict、plist/icon、lipo/vtool均通过；最终8/8自动测试通过。临时副本已卸载清理。
+- 独立审查gpt-6.1-sol / medium：打包、签名、错误处理、架构检查和发布说明无重要问题。对最终lipo -archs替代也已复核。
+- Computer Use：Finder查看只读挂载盘，切换图标视图确认应用新图标、Applications及安装说明。已卸载；未从临时挂载路径启动app，以免建立重复应用路径授权。
+- Release作为预览版，明确未经Developer ID签名/Apple公证、Intel未实机验证、部分扫码/通知GUI验证未完成。当前无代码许可变更。

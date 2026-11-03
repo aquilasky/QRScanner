@@ -48,3 +48,11 @@
 - 独立审查 gpt-6.1-sol / medium：无重要问题，确认资源签名和更新逻辑有效。
 - Computer Use：活动监视器正常退出旧进程；Finder从Launch.command构建启动，定位build/QRScanner.app并截图确认列表已显示新图标。codesign --verify --strict通过。
 - 菜单栏仍使用现有系统单色符号；新彩色图标用于应用包识别。
+
+## 2026-11-03 · 无二维码仅通知与通知图标排查
+- 用户要求去掉“没有发现二维码”空结果窗口：handle([])现在只notify并return。保留真实执行错误详情及实际识别结果操作，避免通知关闭时丢失错误反馈。
+- 图标排查：系统LaunchServices只读dump已记录当前bundle路径和AppIcon.icns/CFBundleIconFile，未发现资源缺失；通知图标缺失的唯一根因尚未确认，缓存仅为推测。
+- 启动时用Apple公开LSRegisterURL(bundleURL,true)更新当前应用注册，失败记录日志；升级0.1.1/build2，设置从Info.plist读取版本。该更新不能单独证明通知中心图标已修复，未重置权限或重启系统服务。
+- 独立测试gpt-6-luna / medium：scripts/test.sh提升权限6/6通过；最终静态核对无二维码只通知、实际错误保留详情、注册和图标关联正确。独立审查gpt-6.1-sol / medium：复核后无未解决重要问题。
+- 部署记录：一次构建因旧应用运行被保护逻辑拒绝，未覆盖；Computer Use活动监视器正常退出旧进程，再从Finder一键入口启动。实际应用设置显示v0.1.1，codesign严格验证成功，最后关闭设置窗口保留菜单栏运行。
+- 实际空选区通知与通知banner图标未完成GUI复验：当前工具不能绑定菜单栏扫描图标；不将注册成功表述为实际图标显示成功。

@@ -1,4 +1,5 @@
 import AppKit
+import CoreServices
 import SwiftUI
 import ServiceManagement
 import UserNotifications
@@ -45,6 +46,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        // Refresh metadata for this installed bundle after app-icon updates.
+        let registrationStatus = LSRegisterURL(Bundle.main.bundleURL as CFURL, true)
+        if registrationStatus != noErr {
+            NSLog("App registration failed: %d", registrationStatus)
+        }
         UNUserNotificationCenter.current().delegate = self
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
@@ -157,7 +163,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
 
     private func handle(_ results: [String]) {
         guard !results.isEmpty else {
-            showResults([], message: "没有发现二维码", detail: "请将完整二维码及四周留白包含在选区内，然后重试。")
             notify(title: "未发现二维码", body: "请重新选择窗口或区域。")
             return
         }
@@ -269,7 +274,7 @@ struct SettingsView: View {
                 Button("屏幕录制权限…") { openScreenPermissionSettings() }
                 Button("通知权限…", action: requestNotifications)
             }
-            Text("v0.1.0").font(.caption).foregroundStyle(.secondary)
+            Text("v\(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—")").font(.caption).foregroundStyle(.secondary)
         }
         .padding(20)
         .frame(width: 360)

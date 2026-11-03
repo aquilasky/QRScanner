@@ -1,0 +1,17 @@
+QRScanner 0.1.2 · macOS 14 或更新版本
+Apple Silicon / Intel 通用版本
+
+1. 将 QRScanner.app 拖到 Applications 文件夹。
+2. 从“应用程序”启动 QRScanner。
+3. 左键菜单栏二维码图标开始扫描：单击选窗口，拖动框选，Esc或右键取消。
+4. 首次扫描时，在“系统设置 → 隐私与安全性 → 屏幕与系统音频录制”中允许 QRScanner；按系统要求退出重开。
+5. 右键菜单栏图标可设置开机启动、自动打开网页、自动复制及通知，也可退出。
+
+此版本使用本地 ad-hoc 签名，未经 Developer ID 签名或 Apple 公证。
+如果 macOS 阻止打开，请先核对 GitHub Release 来源与 SHA-256，再在系统设置的“隐私与安全性”中按系统提供的“仍要打开”流程确认。无需关闭 Gatekeeper 或其他系统保护。
+
+升级时先从菜单栏右键退出旧版，再替换应用。代码版本变化后可能需要重新授予录屏权限。
+识别在本机完成；不保存截图或扫描历史。自动复制默认关闭。
+Intel版本已交叉编译，尚未在Intel实机验证。通知图标显示及多屏扫码仍需更多实机验证。
+
+源码与发布页：https://github.com/aquilasky/QRScanner

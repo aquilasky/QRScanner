@@ -1,0 +1,5 @@
+Mode: built-in image_gen, transparent_background=true
+
+Use case: logo-brand. Asset type: final macOS application icon for QRScanner, square 1024x1024. Create a polished restrained native macOS utility icon: one centered rounded-square tile, pale cool ivory ceramic surface with very subtle bevel and soft dimensional shadow, clean emerald-green scan viewfinder corner brackets framing a simplified bold QR-code symbol. QR motif should have three clear finder squares and just a few generous geometric modules, readable at 32px, not an actual scannable code. Clear silhouette, precise balanced spacing, professional Apple-like desktop icon craft. Tile occupies approximately 84% of canvas, with consistent outer padding. Transparent background outside tile, no surrounding scene. No text, no letters, no device, no scan beam, no extra decorations. Single icon only, straight front view.
+
+Actual generated source: 1254 x 1254 RGBA PNG. ICNS resized using sips and packaged using iconutil; contains standard 16/32/128/256/512-point 1x/2x slots.
